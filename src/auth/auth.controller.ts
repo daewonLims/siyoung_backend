@@ -11,6 +11,12 @@ import { RoleGuard } from './security/roles.guard';
 export class AuthController {
     constructor( private authService: AuthService ) {}
 
+    @Post('/check')
+    @UsePipes(ValidationPipe)
+    async checkAccount(@Body() userDto:UserDTO ): Promise<any> {
+        return await this.authService.checkAccount(userDto);
+    }
+
     //회원가입
     @Post('/register')
     @UsePipes(ValidationPipe)
@@ -21,7 +27,10 @@ export class AuthController {
     //로그인
     @Post('/login')
     async login(@Body() userDto: UserDTO, @Res() res:Response ): Promise<any> {
+
+        
         const jwt = await this.authService.validateUser(userDto);
+        console.log('jwt ===',jwt)
         res.setHeader('Authorization', 'Bearer '+jwt.accessToken);
         //cookie에 저장
         res.cookie('jwt', jwt.accessToken, {

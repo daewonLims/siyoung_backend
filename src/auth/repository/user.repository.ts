@@ -1,5 +1,5 @@
+import { User } from 'src/domain/user.schema';
 import { EntityRepository, Repository } from 'typeorm';
-import { User } from '../../domain/user.entity';
 /**
  * 저장소 선언
  */
