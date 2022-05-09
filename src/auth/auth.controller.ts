@@ -28,7 +28,6 @@ export class AuthController {
     @Post('/login')
     async login(@Body() userDto: UserDTO, @Res() res:Response ): Promise<any> {
 
-        
         const jwt = await this.authService.validateUser(userDto);
         console.log('jwt ===',jwt)
         res.setHeader('Authorization', 'Bearer '+jwt.accessToken);
