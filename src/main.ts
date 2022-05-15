@@ -22,6 +22,7 @@ async function bootstrap() {
 		})
 	);
   const port = process.env.NODE_SERVER_PORT;
+  // const port = 3000;
   console.log(`setup Port: ${port}`);
   await app.listen(port);
   console.log(`Nlp Demo API is running on: ${await app.getUrl()}`);

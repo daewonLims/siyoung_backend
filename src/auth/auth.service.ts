@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Payload } from './security/payload.interface';
 import { User } from 'src/domain/user.schema';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -27,36 +28,47 @@ export class AuthService {
      * - 있는 경우 중복되어 HttpException으로 throw발생 : HttpStatus Bad Request- status:400
      */
     async registerUser(newUser: UserDTO): Promise<UserDTO> {
-        let userFind: UserDTO = await this.userService.findByFields({
-            where: { userId: newUser.userId }
-        });
-        if (userFind) {
+        let userFind: UserDTO = await this.userService.findById(newUser.userId);
+        console.log("test====",newUser);
+        console.log("test====",userFind[0]);
+        
+        if (userFind[0]!==undefined) {
             throw new HttpException('User name aleady used!', HttpStatus.BAD_REQUEST)
         } else {
             return await this.userService.save(newUser);
         }
     }
+    /*
+    model.find({
+    '_id': { $in: [
+        mongoose.Types.ObjectId('4ed3ede8844f0f351100000c'),
+        mongoose.Types.ObjectId('4ed3f117a844e0471100000d'), 
+        mongoose.Types.ObjectId('4ed3f18132f50c491100000e')
+    ]}
+}, function(err, docs){
+     console.log(docs);
+});
+    */
 
     async validateUser(userDto: UserDTO): Promise<{ accessToken: string } | undefined> {
-        let userFind: User = await this.userService.findByFields({
-            where: {userId: userDto.userId }
-        });
-        if (!userFind.userId) {
+        let userFind: User = await this.userService.findById(userDto.userId);
+        console.log('userFind==login==\n',userFind[0])
+        if (userFind[0] === undefined) {
             throw new UnauthorizedException('Please check your ID.')
         }
         console.log('========== login datas ===========')
         //암호화한 db에 있는 hash데이터와 비교
-        const validatePassword = await bcrypt.compare(userDto.password, userFind.password);
+        const validatePassword = await bcrypt.compare(userDto.password, userFind[0].password);
         console.log('=== bcrypt result ===',validatePassword)
-        if ( !userFind || !validatePassword ) {
+        if ( userFind[0]===undefined || !validatePassword ) {
             throw new UnauthorizedException('Please again.');
         } else {
-            this.converInAuthorities(userFind);
+            this.converInAuthorities(userFind[0]);
             // return userFind;
             const payload:Payload = {
-                userId: userFind.userId,
-                username: userFind.username, 
-                authorities: userFind.authorities 
+                userId: userFind[0].userId,
+                username: userFind[0].username, 
+                authorities: userFind[0].authorities 
             };
             console.log('=== create login token ===\n',payload)
             // return "Login Success";

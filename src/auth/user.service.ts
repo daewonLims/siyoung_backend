@@ -24,7 +24,9 @@ export class UserService {
     async findAccount(userDto:UserDTO):Promise<any> {
         return await this.userModel.findOne(userDto);
     }
-
+    async findById(userID: string): Promise<any> {
+        return await this.userModel.find({"userId":userID}).exec();
+    }
     /**
      * 단건 조회 로직
      * @param options FindOneOption<UserDTO>
